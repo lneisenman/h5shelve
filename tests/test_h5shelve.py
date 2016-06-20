@@ -16,9 +16,9 @@ import h5shelve as h5s
 
 class Test_open():
 
-    def test_returns_H5shelf(self):
-        test = h5s.open('dummy')
-        print(type(test))
+    def test_returns_H5shelf(self, tmpdir):
+        fn = tmpdir.join('dummy.h5')
+        test = h5s.open(fn.strpath)
         assert isinstance(test, h5s.h5shelve.H5shelf)
 
 
