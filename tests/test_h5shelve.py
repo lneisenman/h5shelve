@@ -21,6 +21,11 @@ class Test_open():
         test = h5s.open(fn.strpath)
         assert isinstance(test, h5s.h5shelve.H5shelf)
 
+    def test_context_manager(self, tmpdir):
+        fn = tmpdir.join('dummy.h5')
+        with h5s.open(fn.strpath) as test:
+            test['test'] = 'test'
+
 
 class TestH5shelve(object):
 
