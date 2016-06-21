@@ -22,6 +22,7 @@ class Test_open():
         assert isinstance(test, h5s.h5shelve.H5shelf)
 
     def test_context_manager(self, tmpdir):
+        """ the fact that it runs without error is the test """
         fn = tmpdir.join('dummy.h5')
         with h5s.open(fn.strpath) as test:
             test['test'] = 'test'
