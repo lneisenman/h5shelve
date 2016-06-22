@@ -14,8 +14,11 @@ class H5shelf(collections.MutableMapping):
     def __init__(self, fn, mode='a', *args, **kwargs):
         self.filename = fn
         self.mode = mode
-        self.file = h5py.File(fn)
         self.dict = dict()
+        if 'w' in mode:
+            return
+
+        self.read_data_from_hdf5()
 
     def __enter__(self):
         return self
@@ -24,7 +27,7 @@ class H5shelf(collections.MutableMapping):
         self.close()
 
     def close(self):
-        self.file.close()
+        self.write_data_to_hdf5()
 
     def __iter__(self):
         for k in self.dict.keys():
@@ -50,6 +53,23 @@ class H5shelf(collections.MutableMapping):
 
     def __delitem__(self, key):
         del self.dict[key]
+
+    def read_data_from_hdf5(self):
+        with h5py.File(self.filename) as db:
+            self.dict = self._extract_data(db)
+
+    def _extract_data(self, db):
+        result = dict()
+        for key in db:
+            if isinstance(db[key], h5py._hl.dataset.Dataset):
+                result[key] = db[key][...]
+            else:
+                result[key] = self._extract_data(db[key])
+
+        return result
+
+    def write_data_to_hdf5(self):
+        pass
 
 
 def open(fn, *args, **kwargs):
