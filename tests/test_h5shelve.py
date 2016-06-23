@@ -44,6 +44,28 @@ class Test_open():
             assert test['sub1']['sub2']['string'] == 'string value'
 
 
+class Test_close():
+
+    def test_write(self, tmpdir):
+        fn = tmpdir.join('dummy.h5')
+        subgroup = {'group1': np.linspace(0, 4, 5)}
+        subgroup['group2'] = 3
+        sub2 = {'string': 'string value'}
+        sub1 = {'sub2': sub2}
+
+        with h5s.open(fn.strpath) as test:
+            test['array'] = np.linspace(0, 9, 10)
+            test['subgroup'] = subgroup
+            test['sub1'] = sub1
+
+        with h5s.open(fn.strpath) as test:
+            assert np.allclose(test['array'], np.linspace(0, 9, 10))
+            assert np.allclose(test['subgroup']['group1'],
+                               np.linspace(0, 4, 5))
+            assert test['subgroup']['group2'] == 3
+            assert test['sub1']['sub2']['string'] == 'string value'
+
+
 class TestH5shelve(object):
 
     @classmethod

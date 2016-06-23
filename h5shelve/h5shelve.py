@@ -19,6 +19,7 @@ class H5shelf(collections.MutableMapping):
             return
 
         self.read_data_from_hdf5()
+        self.changed = False
 
     def __enter__(self):
         return self
@@ -49,6 +50,7 @@ class H5shelf(collections.MutableMapping):
         return self.dict[key]
 
     def __setitem__(self, key, value):
+        self.changed = True
         self.dict[key] = value
 
     def __delitem__(self, key):
@@ -69,7 +71,23 @@ class H5shelf(collections.MutableMapping):
         return result
 
     def write_data_to_hdf5(self):
-        pass
+        if not self.changed:
+            return
+
+        with h5py.File(self.filename, self.mode) as db:
+            self._write_data(db, self.dict, '')
+
+    def _write_data(self, db, data, path):
+        for key in data:
+            if path == '':
+                data_path = key
+            else:
+                data_path = path + '/' + key
+
+            if isinstance(data[key], dict):
+                self._write_data(db, data[key], data_path)
+            else:
+                db.create_dataset(data_path, data=data[key])
 
 
 def open(fn, *args, **kwargs):
